@@ -1,12 +1,9 @@
 import { Layout } from '@components/Layout'
-import { Typography } from '@ui/Typography'
 import { Grid } from '@ui/Grid'
-
-import { RichText } from '@components/RichText'
+import { Typography } from '@ui/Typography'
+import { getPlant, getPlantList } from '@api/index'
 import { AuthorCard } from '@components/AuthorCard'
-import { useEffect, useState } from 'react'
-import { getPlant, getPlantList, QueryStatus } from '@api/index'
-import { useRouter } from 'next/router'
+import { RichText } from '@components/RichText'
 import { GetStaticProps, InferGetStaticPropsType } from 'next'
 
 type PathType = { params: { slug: string } }
@@ -20,7 +17,7 @@ export const getStaticPaths = async () => {
 
   return {
     paths,
-    fallback: false,
+    fallback: 'blocking',
   }
 }
 
@@ -44,6 +41,7 @@ export const getStaticProps: GetStaticProps<PlantEntryPageProps> = async ({
       props: {
         plant,
       },
+      revalidate: 5 * 60,
     }
   } catch (error) {
     return {

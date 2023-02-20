@@ -4,7 +4,6 @@ import { Hero } from '@components/Hero'
 import { Layout } from '@components/Layout'
 import { PlantCollection } from '@components/PlantCollection'
 import { GetStaticProps, InferGetStaticPropsType } from 'next'
-import { useEffect, useState } from 'react'
 
 type HomeProps = { plants: Plant[] }
 
@@ -15,6 +14,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     props: {
       plants,
     },
+    revalidate: 5 * 60,
   }
 }
 
