@@ -5,46 +5,56 @@ import { Grid } from '@ui/Grid'
 import { RichText } from '@components/RichText'
 import { AuthorCard } from '@components/AuthorCard'
 import { useEffect, useState } from 'react'
-import { getPlant, QueryStatus } from '@api/index'
+import { getPlant, getPlantList, QueryStatus } from '@api/index'
 import { useRouter } from 'next/router'
+import { GetStaticProps, InferGetStaticPropsType } from 'next'
 
-export default function PlantEntryPage() {
-  const [status, setStatus] = useState<QueryStatus>('idle')
-  const [plant, setPlant] = useState<Plant | null>(null)
-  const router = useRouter()
-  const slug = router.query.slug
+type PathType = { params: { slug: string } }
 
-  useEffect(() => {
-    if (typeof slug !== 'string') {
-      return
+export const getStaticPaths = async () => {
+  const entries = await getPlantList({ limit: 10 })
+
+  const paths: PathType[] = entries.map((entry) => ({
+    params: { slug: entry.slug },
+  }))
+
+  return {
+    paths,
+    fallback: false,
+  }
+}
+
+type PlantEntryPageProps = { plant: Plant }
+
+export const getStaticProps: GetStaticProps<PlantEntryPageProps> = async ({
+  params,
+}) => {
+  const slug = params?.slug
+
+  if (typeof slug !== 'string') {
+    return {
+      notFound: true,
     }
-
-    setStatus('loading')
-    getPlant(slug)
-      .then((plant) => {
-        setPlant(plant), setStatus('success')
-      })
-      .catch((error) => {
-        setStatus('error')
-      })
-  }, [slug])
-
-  if (status === 'idle' || status === 'loading') {
-    return (
-      <Layout>
-        <main>Loading...</main>
-      </Layout>
-    )
   }
 
-  if (!plant || status === 'error') {
-    return (
-      <Layout>
-        <main>Something went wrong</main>
-      </Layout>
-    )
-  }
+  try {
+    const plant = await getPlant(slug)
 
+    return {
+      props: {
+        plant,
+      },
+    }
+  } catch (error) {
+    return {
+      notFound: true,
+    }
+  }
+}
+
+export default function PlantEntryPage({
+  plant,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <Layout>
       <Grid container spacing={4}>
