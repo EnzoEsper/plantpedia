@@ -1,4 +1,6 @@
 import { getPlantList } from '@api/index'
+import { Authors } from '@components/Authors'
+import { Hero } from '@components/Hero'
 import { Layout } from '@components/Layout'
 import { PlantCollection } from '@components/PlantCollection'
 import { GetStaticProps, InferGetStaticPropsType } from 'next'
@@ -19,7 +21,17 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 const Home = ({ plants }: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
     <Layout>
-      <PlantCollection plants={plants} variant="square" />
+      <Hero {...plants[0]} className="mb-20" />
+      <Authors className="mb-10" />
+      <PlantCollection
+        plants={plants.slice(1, 3)}
+        variant="vertical"
+        className="mb-24"
+      />
+      <PlantCollection
+        plants={plants.length > 0 ? plants.slice(3, 9) : plants}
+        variant="square"
+      />
     </Layout>
   )
 }
